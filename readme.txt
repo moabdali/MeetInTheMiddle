@@ -9,3 +9,12 @@ pip install geopy
 
 
 Or go to https://geopy.readthedocs.io/en/stable/#installation for more information
+
+
+v 0.2 
+
+- Now uses a pySimple GUI for prettier input
+   – error checking on number of cars; geopy can still crash though
+- To do: implement a text based save system that keeps track of previous successful addresses and allows you to access them from a drop down
+- Open google maps from within a window instead of opening browser perhaps
+
