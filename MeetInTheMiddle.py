@@ -1,101 +1,64 @@
-import PySimpleGUI as psGUI             #making the popups and window
 from geopy.geocoders import Nominatim   #geolocation use pip install geopy
 import webbrowser                       #open google maps
-import sys
 
 #initialize geolocator
 geolocator = Nominatim(user_agent="MeetInTheMiddle")
 
-psGUI.theme('DarkAmber')   # Add a little color to the window
-
-#Makes sure your initial inputs are legal
-def numCarsErrorCheck(numOfCars):
-    # clean exit if no cars are entered or if exited/cancelled
-    if not numOfCars:
-        psGUI.popup_cancel('User has decided to exit.')
-        sys.exit()
-    # check to make sure a number was entered
-    
-    try:
-        int(numOfCars)
-    except ValueError:
-        psGUI.popup_cancel('You must type in a positive integer.  Exiting.')
-        sys.exit()
-    # check to make sure it was positive
-    if int(numOfCars) < 1:
-        psGUI.popup_cancel('You must type in a positive integer.  Exiting.')
-        sys.exit()
-
-friendArray = []
-
-# will determine the number of addresses you can input later
-numOfCars = psGUI.popup_get_text("How many cars will be going to the meet up location?")
-numCarsErrorCheck(numOfCars)
-numOfCars = int(numOfCars)
-
-layout = [[psGUI.Text('Enter each person\'s address below.  Use at least street,city and state.')]]
-layout+= [[psGUI.T("Address "+str(i+1),size = (10,1)), psGUI.InputText(key=i)] for i in range(int(numOfCars))]
-layout += [[psGUI.Button('Calculate')]]
-
-meetInMiddle = psGUI.Window('Meet in Middle', layout)
-
-while True:
-    event, values = meetInMiddle.read()
-    if event == 'Quit' or event == psGUI.WIN_CLOSED:
-        sys.exit()
-
-    if event == 'Calculate':
-        for i in values:
-            location =(geolocator.geocode(values[i]))
-            print(location)
-            friendArray.append((location.latitude, location.longitude))
-
-    latiAverage = 0.0
-    longAverage = 0.0
-
-    #finds the average latlong of all the points (this is the central theme of this program!)
-    for i in range (0,numOfCars):
-        latiAverage = latiAverage + friendArray[i][0]
-        longAverage = longAverage + friendArray[i][1]
-
-    latiAverage = latiAverage / numOfCars
-    longAverage = longAverage / numOfCars
-    #averages out the lat long
 
 
-    latLongAverage = (latiAverage,longAverage)
-    #combine lat and long into one entry for easier usage
 
 
-    #turn the latlong average into a real address (geopy attempts to use the closest address it can find)
-    location = geolocator.reverse(latLongAverage)
-
-    break    
-
-
-#close previous window; no longer needed
-meetInMiddle.close()
+print("This program accepts the addresses of your friends (and yourself) and finds a\nfair middle ground to meet at.  This program will assume each car is \none data point.")
+print("*"*75)
+getInput = (input("How many cars will be driven? \n>> "))
+friendNum = (int)(getInput)
+print("*"*75)
+friendArray = [] #array to keep track of each friend's location in lat long
 
 
-layout1 = [
-    [psGUI.Text('Your meet up address is :'+str(location.address)+"\n\nYou can click on Open Google below, and then NEARBY on the Google Maps page and then click RESTAURANTS or type\nPARKS to find somewhere to eat or hang out.\n")],
-    [psGUI.Button("Open Google Maps"),psGUI.Button('Quit')]
-    ]
+for i in range (0,friendNum):
+    while True:
+        inputAddress = input("What is car "+(str)(i+1)+"'s current address?  Provide at least a street and city at minimum.\n>> ")
+        location =(geolocator.geocode(inputAddress)) #convert input to detailed address
+        print("Assuming address is: "+(str)(location.address)) #convert to street address
+        print("Is this good? y for yes, otherwise n to try again.\n")
+        getInput = input(">> ")
+        if getInput == "y":
+            print("*"*75)
+            break
+        else:
+            continue
+    friendArray.append((location.latitude, location.longitude))
 
-openGoogle = psGUI.Window('Open Google', layout1)
 
-while True:
-    
-    
-    event = openGoogle.read()
-    if event[0] == psGUI.WIN_CLOSED or event == 'Quit':
-        openGoogle.close()
-        sys.exit()
-    if event[0] == "Open Google Maps":
-        lookup = str(latLongAverage[0])+','+str(latLongAverage[1])
-        openGoogle.close()
-        webbrowser.open('https://www.google.com/maps/place/'+lookup)
-        sys.exit()
-        
-    
-    
+latiAverage = 0.0
+longAverage = 0.0
+
+
+for i in range (0,friendNum):
+    latiAverage = latiAverage + friendArray[i][0]
+    longAverage = longAverage + friendArray[i][1]
+
+latiAverage = latiAverage / friendNum
+longAverage = longAverage / friendNum
+#averages out the lat long
+
+
+latLongAverage = (latiAverage,longAverage)
+#combine lat and long into one entry for easier usage
+
+#turn the latlong average into a real address (geopy attempts to use the closest address it can find)
+location = geolocator.reverse(latLongAverage)
+
+
+print("\nThe closest known fair address is:\n "+(str)(location.address))
+print("*"*75)
+print("\nThe latitude longitude is "+str(latLongAverage))
+print("*"*75)
+lookup = str(latLongAverage[0])+','+str(latLongAverage[1])
+getInput = (input("Open Google Maps?  y/n \n>> "))
+
+if getInput == "y":
+            webbrowser.open('https://www.google.com/maps/place/'+lookup)
+else:
+    exit()
