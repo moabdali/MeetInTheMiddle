@@ -3,6 +3,7 @@ from geopy.geocoders import Nominatim   #geolocation use pip install geopy
 import webbrowser                       #open google maps
 import sys
 
+
 #initialize geolocator
 geolocator = Nominatim(user_agent="MeetInTheMiddle")
 
@@ -19,25 +20,43 @@ def numCarsErrorCheck(numOfCars):
     try:
         int(numOfCars)
     except ValueError:
-        psGUI.popup_cancel('You must type in a positive integer.  Exiting.')
-        sys.exit()
+        psGUI.popup_cancel('You must type in a positive integer.')
+        return 1
     # check to make sure it was positive
     if int(numOfCars) < 1:
-        psGUI.popup_cancel('You must type in a positive integer.  Exiting.')
-        sys.exit()
+        psGUI.popup_cancel('You must type in a positive integer.')
+        return 2
+    return 0
 
 friendArray = []
 
 # will determine the number of addresses you can input later
-numOfCars = psGUI.popup_get_text("How many cars will be going to the meet up location?")
-numCarsErrorCheck(numOfCars)
+
+carNumLayout = [[psGUI.Text("How many cars will be going to the meet up location?")]]
+carNumLayout.append( [psGUI.T("Number of cars: "), psGUI.InputText()])
+carNumLayout.append( [psGUI.Button('Submit')] )
+carNumWindow = psGUI.Window('CarNumWindow', carNumLayout)
+
+while True:
+    event,values = carNumWindow.read()
+    if event == 'Submit':
+        numOfCars = values[0]
+        result = numCarsErrorCheck(numOfCars)
+        if result == 0:
+            carNumWindow.close()
+            break
+        else:
+            continue
 numOfCars = int(numOfCars)
 
-layout = [[psGUI.Text('Enter each person\'s address below.  Use at least street,city and state.')]]
-layout+= [[psGUI.T("Address "+str(i+1),size = (10,1)), psGUI.InputText(key=i)] for i in range(int(numOfCars))]
-layout += [[psGUI.Button('Calculate')]]
 
+#create the window
+layout = [[psGUI.Text('Enter each person\'s address below.  Use at least street,city and state.')]]
+for i in range(int(numOfCars)):
+    layout.append( [psGUI.T("Address "+str(i+1),size = (10,1)), psGUI.InputText(key=i)])
+layout.append( [psGUI.Button('Calculate')] )
 meetInMiddle = psGUI.Window('Meet in Middle', layout)
+
 
 while True:
     event, values = meetInMiddle.read()
