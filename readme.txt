@@ -18,3 +18,7 @@ v 0.2
 - To do: implement a text based save system that keeps track of previous successful addresses and allows you to access them from a drop down
 - Open google maps from within a window instead of opening browser perhaps
 
+v 0.4
+   - exception checking for bad addresses (fixed the "geopy can still crash though" issue from v.2)
+   - user can reattempt addresses if they don't like them
+   - program shows detailed addresses based on input
